@@ -4,7 +4,7 @@ package main
 This is the stacker command.
 
 Author: thomas.cherry@gmail.com
-Copyright 2023, all rights reserved
+Copyright 2024, all rights reserved
 */
 
 
@@ -25,6 +25,7 @@ type AppData struct {
 	deleteMode *bool
 	rotateMode *bool
 	clearMode *bool
+	versionMode *bool
 }
 
 func setup() AppData {
@@ -35,6 +36,7 @@ func setup() AppData {
     app_data.deleteMode = flag.Bool("delete", false, "Delete item")
     app_data.rotateMode = flag.Bool("rotate", false, "Rotate up")
     app_data.clearMode = flag.Bool("clear", false, "Clear all data")
+    app_data.versionMode = flag.Bool("version", false, "Clear all data")
     flag.Parse()
 
 	return app_data
@@ -43,6 +45,11 @@ func setup() AppData {
 func main() {
 	app_data := setup()
 	action_taken := false
+
+	if *app_data.versionMode {
+		fmt.Println("stacker 1.0 by thomas.cherry@gmail.com")
+		action_taken = true
+	}
 
 	if *app_data.peekMode {
 		fmt.Println(stacker.PeekItem())

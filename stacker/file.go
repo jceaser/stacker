@@ -5,7 +5,7 @@ These are very simple file management functions, mostly boiler plate code and
 in no way perfect
 
 Author: thomas.cherry@gmail.com
-Copyright 2023, all rights reserved
+Copyright 2024, all rights reserved
 */
 
 import (
@@ -33,7 +33,7 @@ func fixPath (path string) string {
 func FileExists(fileName string) bool {
 	fileName = fixPath(fileName)
 	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err) 
+	return !os.IsNotExist(err)
 }
 
 /** load a string from a file */

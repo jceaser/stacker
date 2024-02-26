@@ -4,7 +4,7 @@ package stacker
 Stacker is a simple stack for storing clipboard strings held in Item
 
 Author: thomas.cherry@gmail.com
-Copyright 2023, all rights reserved
+Copyright 2024, all rights reserved
 */
 
 import (
@@ -118,6 +118,6 @@ func FromBytes(raw []byte) *Stacker {
 	err := json.Unmarshal(raw, data)
 	if err !=nil {
 		log.Println(err)
-	}		
+	}
 	return data
 }

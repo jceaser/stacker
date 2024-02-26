@@ -1,5 +1,12 @@
 package stacker
 
+/*
+Public functions to interact with the Stacker system
+
+Author: thomas.cherry@gmail.com
+Copyright 2024, all rights reserved
+*/
+
 import (
 	"fmt"
 	"os"
@@ -22,7 +29,7 @@ func CreateUserStoreDir() {
 
 func LoadItemsFromDisk() (Stacker, bool) {
 	CreateUserStoreDir()
-	fileName := "~/.config/stacker/data.json"
+	fileName := UserHomeDir()
 	var data Stacker
 	if FileExists(fileName) {
 		raw_data := Read(fileName)
@@ -47,7 +54,7 @@ func CreateItem(text string) {
 			}
 		}
 	}
-	
+
 	data.Push(MakeItem(text))
 	Save(UserHomeDir(), data.ToJson())
 }

@@ -16,7 +16,7 @@ This solution is to create a simple clipboard cache in a file.
 Create something:
 
 	>echo thing | stacker
-	
+
 Peek at something:
 
 	>stacker -peek
@@ -40,3 +40,6 @@ Update something, replacing:
 Delete something
 
 	>stacker -delete
+
+---
+Copyright 2024 by thomas.cherry@gmail.com, all rights reserved.
