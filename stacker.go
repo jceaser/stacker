@@ -130,7 +130,7 @@ func main() {
 	} else if *app_data.listMode {
 		fmt.Print(stacker.ListItems(config))
 	} else if *app_data.deleteMode {
-		fmt.Print(stacker.DeleteItem(config))
+		fmt.Println(stacker.DeleteItem(config))
 	} else if *app_data.clearMode {
 		stacker.ClearAll(config)
 	} else if *app_data.rotateMode {

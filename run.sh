@@ -7,7 +7,11 @@ do_build() {
 }
 
 do_test() {
-	go test
+	watch --color go test
+}
+
+do_vet() {
+	watch --color go vet
 }
 
 usage() {
@@ -17,7 +21,8 @@ usage() {
 	printf "${format}" "Flag" "Arg" "Description"
 	printf "${format}" "----" "----" "----"
 	printf "${format}" "b" "----" "Build application"
-	printf "${format}" "2" "----" "Run tests"
+	printf "${format}" "t" "----" "Run tests in a watch"
+	printf "${format}" "v" "----" "Run vet in a watch"
 	printf "${format}" "x" "msg" "Prints out a message"
 }
 
@@ -29,10 +34,11 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-while getopts btx: opt ; do
+while getopts btvx: opt ; do
     case "${opt}" in
         b) do_build ;;
         t) do_test ;;
+        v) do_vet ;;
         x) echo "${OPTARG}" ;;
         *) usage ;;
     esac
