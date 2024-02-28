@@ -18,8 +18,8 @@ import (
 	"strings"
 )
 
-/** resolve tildi to the full path for a user */
-func ExpandPath (path string) string {
+/** resolve tilde to the full path for a user */
+func ExpandPath(path string) string {
 	usr, _ := user.Current()
 	home := usr.HomeDir
 	if path == "~" {
@@ -40,36 +40,36 @@ func FileExists(fileName string) bool {
 /** load a string from a file */
 func FileRead(file string) []byte {
 	file = ExpandPath(file)
-    json_raw, err := os.Open(file)
-    if err != nil {
-        log.Printf("Error: %s\n", err)
-        return nil
-    } else {
-        defer json_raw.Close()
-        bytes, err := ioutil.ReadAll(json_raw)
-        if err!=nil {
-            log.Printf("Error: %s\n", err)
-        } else {
-            return bytes
-        }
-    }
-    return nil
+	json_raw, err := os.Open(file)
+	if err != nil {
+		log.Printf("Error: %s\n", err)
+		return nil
+	} else {
+		defer json_raw.Close()
+		bytes, err := ioutil.ReadAll(json_raw)
+		if err != nil {
+			log.Printf("Error: %s\n", err)
+		} else {
+			return bytes
+		}
+	}
+	return nil
 }
 
 /** save the database to a file */
 func FileSave(file string, json_text []byte) {
-    var err error
-    file = ExpandPath(file)
-    err = ioutil.WriteFile(file, json_text, 0644)
-    if err!=nil {
-        log.Printf("Write Error: %s - %s\n", file, err)
-    }
+	var err error
+	file = ExpandPath(file)
+	err = ioutil.WriteFile(file, json_text, 0644)
+	if err != nil {
+		log.Printf("Write Error: %s - %s\n", file, err)
+	}
 }
 
 func FileDelete(file string) {
-    file = ExpandPath(file)
+	file = ExpandPath(file)
 	err := os.Remove(file)
- 	if err != nil {
-    	log.Printf("Delete Error: %s - %s\n", file, err)
-  	}
+	if err != nil {
+		log.Printf("Delete Error: %s - %s\n", file, err)
+	}
 }

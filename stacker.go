@@ -8,36 +8,40 @@ Copyright 2024, all rights reserved
 package main
 
 import (
-    "io"
 	"flag"
 	"fmt"
-	"os"
-    "path/filepath"
-	"strings"
 	"github.com/jceaser/stacker/stacker"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 /* ************************************************************************** */
 //MARK: - Structs
 
-/* Holds all application configuration and state, can be passed to lower
-functions if needed */
-type AppData struct {
-	peekMode *bool
-	listMode *bool
-	updateMode *bool
-	deleteMode *bool
-	rotateMode *bool
-	clearMode *bool
-	versionMode *bool
-	cleanLimit *int
+/*
+	Holds all application configuration and state, can be passed to lower
 
-	name *string
-	path *string
+functions if needed
+*/
+type AppData struct {
+	peekMode    *bool
+	listMode    *bool
+	updateMode  *bool
+	deleteMode  *bool
+	rotateMode  *bool
+	clearMode   *bool
+	versionMode *bool
+	cleanLimit  *int
+
+	encode *bool
+	name   *string
+	path   *string
 }
 
 func (self AppData) Context() stacker.Config {
-	return stacker.Config{Name: *self.name, Path: *self.path}
+	return stacker.Config{Name: *self.name, Path: *self.path, Encode: *self.encode}
 }
 
 /* ************************************************************************** */
@@ -47,8 +51,8 @@ func (self AppData) Context() stacker.Config {
 export XDG_CONFIG_HOME=~/.config/test ; go run stacker.go
 */
 func findConfigPath() string {
-	configHome := os.Getenv("XDG_CONFIG_HOME") //standard location
-	appConfigPath := filepath.Base(os.Args[0]) + "/data.json"    //sub directory
+	configHome := os.Getenv("XDG_CONFIG_HOME")                //standard location
+	appConfigPath := filepath.Base(os.Args[0]) + "/data.json" //sub directory
 	if len(configHome) < 1 {
 		configHome = "~/.config" //assume things
 	}
@@ -60,23 +64,24 @@ func findConfigPath() string {
 /* create app data from the command line flags */
 func setup() AppData {
 	app_data := AppData{}
-    app_data.peekMode = flag.Bool("peek", false, "peek mode")
-    app_data.listMode = flag.Bool("ls", false, "List Everything")
-    app_data.updateMode = flag.Bool("update", false, "Update an item")
-    app_data.deleteMode = flag.Bool("delete", false, "Delete item")
-    app_data.rotateMode = flag.Bool("rotate", false, "Rotate up")
-    app_data.clearMode = flag.Bool("clear", false, "Clear all data")
-    app_data.versionMode = flag.Bool("version", false, "Clear all data")
+	app_data.peekMode = flag.Bool("peek", false, "peek mode")
+	app_data.listMode = flag.Bool("ls", false, "List Everything")
+	app_data.updateMode = flag.Bool("update", false, "Update an item")
+	app_data.deleteMode = flag.Bool("delete", false, "Delete item")
+	app_data.rotateMode = flag.Bool("rotate", false, "Rotate up")
+	app_data.clearMode = flag.Bool("clear", false, "Clear all data")
+	app_data.versionMode = flag.Bool("version", false, "Clear all data")
 
-    app_data.cleanLimit = flag.Int("clean", -1, "Clean old data")
+	app_data.cleanLimit = flag.Int("clean", -1, "Clean old data")
+	app_data.encode = flag.Bool("encode", false, "Mask sensitive data in list and file")
 	app_data.name = flag.String("name", "default", "Stack Name")
 	app_data.path = flag.String("path", "", "full Path to stack file")
-    flag.Parse()
+	flag.Parse()
 
-    if len(*app_data.path)<1 {
-    	default_path := findConfigPath()
-    	app_data.path = &default_path
-    }
+	if len(*app_data.path) < 1 {
+		default_path := findConfigPath()
+		app_data.path = &default_path
+	}
 
 	return app_data
 }
@@ -87,8 +92,8 @@ stream then pop from the stack.
 */
 func StreamAction(app_data AppData) {
 	/*
-	Default action, if standard in has text, then assume we are in write mode
-	otherwise assume read mode.
+		Default action, if standard in has text, then assume we are in write mode
+		otherwise assume read mode.
 	*/
 	config := app_data.Context()
 	stat, _ := os.Stdin.Stat()
@@ -97,8 +102,8 @@ func StreamAction(app_data AppData) {
 		if err != nil {
 			panic(err)
 		}
-		text := strings.TrimSpace(string (everything))
-		if len(text)>0 {
+		text := strings.TrimSpace(string(everything))
+		if len(text) > 0 {
 			//Write mode
 			if *app_data.updateMode {
 				fmt.Println(stacker.UpdateItem(config, text))
@@ -134,7 +139,7 @@ func main() {
 	} else if *app_data.clearMode {
 		stacker.ClearAll(config)
 	} else if *app_data.rotateMode {
-		stacker.RotateUp(config)
+		fmt.Println(stacker.RotateUp(config))
 	} else if *app_data.cleanLimit > 0 {
 		stacker.RemoveOld(config, *app_data.cleanLimit)
 	} else {

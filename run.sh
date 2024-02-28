@@ -14,6 +14,10 @@ do_vet() {
 	watch --color go vet
 }
 
+do_fmt() {
+	watch gofmt -d ***/*.go
+}
+
 usage() {
 	echo "Usage statment"
 
@@ -34,11 +38,12 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-while getopts btvx: opt ; do
+while getopts bftvx: opt ; do
     case "${opt}" in
         b) do_build ;;
         t) do_test ;;
         v) do_vet ;;
+        f) do_fmt ;;
         x) echo "${OPTARG}" ;;
         *) usage ;;
     esac

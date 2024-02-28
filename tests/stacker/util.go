@@ -4,8 +4,8 @@
 package main
 
 import (
-	"testing"
 	"bytes"
+	"testing"
 )
 
 /*

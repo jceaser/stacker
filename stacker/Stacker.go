@@ -16,12 +16,15 @@ import (
 /******************************************************************************/
 //MARK: - Structures
 
+var TEXT = "text/plain"
+var BASE64 = "application/base64"
+
 /*
 Stacker is the entire data structure for the file system, it contains a list of
 Items
 */
 type Stacker struct {
-	Name string
+	Name  string
 	Items []Item
 }
 
@@ -30,15 +33,16 @@ One node in the Structure, has a time stamp for judging how long item is been
 stored.
 */
 type Item struct {
-	Time int64
-	Data string
+	Time    int64
+	Data    string
+	Content string
 }
 
 /* Creates a storable Json record for Stacker */
 func (data Stacker) ToJson() []byte {
-	data_as_json, err := json.MarshalIndent (data, "", "  ")
+	data_as_json, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		log.Println (err)
+		log.Println(err)
 	}
 	return data_as_json
 }
@@ -52,7 +56,7 @@ func (data *Stacker) ensure() {
 
 /* Take the difference of the Item time stamp from now */
 func (self Item) FromNow() int {
-	return int(time.Now().Unix() - self.Time)
+	return int(Time_now_unix() - self.Time)
 }
 
 /******************************************************************************/
@@ -73,8 +77,8 @@ func (data *Stacker) Push(item Item) {
 func (data *Stacker) Pop() Item {
 	l := len(data.Items)
 	var found Item
-	if 0<l {
-		n := l-1
+	if 0 < l {
+		n := l - 1
 		found = data.Items[n]
 		data.Items = data.Items[:n]
 	}
@@ -94,11 +98,11 @@ func (data *Stacker) PopQueue() Item {
 
 /* Return the top item from the stack without removing it */
 func (data Stacker) Peek() Item {
-    l := len(data.Items)
-    var found Item
-    if 0<l {
-    	found = data.Items[l-1]
-    }
+	l := len(data.Items)
+	var found Item
+	if 0 < l {
+		found = data.Items[l-1]
+	}
 	return found
 }
 
@@ -113,7 +117,7 @@ func (data *Stacker) Replace(item Item) Item {
 /* Swap the top two item on the stack */
 func (data *Stacker) Swap() {
 	l := len(data.Items)
-	if 1<l {
+	if 1 < l {
 		was_last := data.Pop()
 		was_next := data.Pop()
 		data.Push(was_last)
@@ -132,7 +136,13 @@ func (data *Stacker) RotateUp() {
 
 /* Create a new Item struct using the current time as the time stamp */
 func MakeItem(data string) Item {
-	item := Item{Time_now_unix(), data}
+	item := Item{Time_now_unix(), data, "text/plain"}
+	return item
+}
+
+func MakeEncodedItem(data, content_type string) Item {
+	item := MakeItem(data)
+	item.Content = content_type
 	return item
 }
 
@@ -140,7 +150,7 @@ func MakeItem(data string) Item {
 func FromBytes(raw []byte) *Stacker {
 	data := &Stacker{}
 	err := json.Unmarshal(raw, data)
-	if err !=nil {
+	if err != nil {
 		log.Println(err)
 	}
 	data.ensure()
