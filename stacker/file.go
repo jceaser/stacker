@@ -1,5 +1,3 @@
-package stacker
-
 /*
 These are very simple file management functions, mostly boiler plate code and
 in no way perfect
@@ -8,37 +6,40 @@ Author: thomas.cherry@gmail.com
 Copyright 2024, all rights reserved
 */
 
+package stacker
+
 import (
+	"errors"
 	"io/ioutil"
-	"os/user"
-	"strings"
-	"path/filepath"
-	"os"
 	"log"
+	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
 )
 
 /** resolve tildi to the full path for a user */
-func fixPath (path string) string {
+func ExpandPath (path string) string {
 	usr, _ := user.Current()
-	dir := usr.HomeDir
+	home := usr.HomeDir
 	if path == "~" {
-		path = dir
+		path = home
 	} else if strings.HasPrefix(path, "~/") {
-		path = filepath.Join(dir, path[2:])
+		path = filepath.Join(home, path[2:])
 	}
 	return path
 }
 
 /** test if a file exists */
 func FileExists(fileName string) bool {
-	fileName = fixPath(fileName)
+	fileName = ExpandPath(fileName)
 	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
+	return !errors.Is(err, os.ErrNotExist)
 }
 
 /** load a string from a file */
-func Read(file string) []byte {
-	file = fixPath(file)
+func FileRead(file string) []byte {
+	file = ExpandPath(file)
     json_raw, err := os.Open(file)
     if err != nil {
         log.Printf("Error: %s\n", err)
@@ -56,13 +57,19 @@ func Read(file string) []byte {
 }
 
 /** save the database to a file */
-func Save(file string, json_text []byte) {
+func FileSave(file string, json_text []byte) {
     var err error
-    file = fixPath(file)
+    file = ExpandPath(file)
     err = ioutil.WriteFile(file, json_text, 0644)
     if err!=nil {
         log.Printf("Write Error: %s - %s\n", file, err)
-    } else {
-        //log.Printf("File %s has been saved\n", file)
     }
+}
+
+func FileDelete(file string) {
+    file = ExpandPath(file)
+	err := os.Remove(file)
+ 	if err != nil {
+    	log.Printf("Delete Error: %s - %s\n", file, err)
+  	}
 }

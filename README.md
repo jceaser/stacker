@@ -4,10 +4,11 @@ A tool for saving things to a stack to share between tmux sessions
 ## What is this and why
 
 I have a need to "copy and paste" things between tmux panes all the time. A
-standard clipboard could be used, but I don't always have a clipboard and some
-times I want the value to persist, or even stranger, I want one copy and multiple
-pastes. I tried fifo files, but the copy app is held till the paste app runs and
-it's not one to many but one to one. Also, fifo will not persist through a reboot.
+standard clipboard could be used, but I don't always have a clipboard (old twm
+machine for instance) and some times I want the value to persist, or even
+stranger, I want one copy and multiple pastes. I tried fifo files, but the copy
+app is held till the paste app runs and it is not one to many but one to one.
+Also, fifo will not persist through a reboot.
 
 This solution is to create a simple clipboard cache in a file.
 

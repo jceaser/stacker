@@ -1,5 +1,3 @@
-package stacker
-
 /*
 Public functions to interact with the Stacker system
 
@@ -7,32 +5,48 @@ Author: thomas.cherry@gmail.com
 Copyright 2024, all rights reserved
 */
 
+package stacker
+
 import (
+	"path/filepath"
 	"fmt"
 	"os"
 	"strings"
 )
 
-/*****************************************************************************/
-//mark - Functions
-
-func UserHomeDir() string {
-	return "~/.config/stacker/data.json"
+type Config struct {
+	Name string
+	Path string
 }
 
-func CreateUserStoreDir() {
-	config := fixPath("~/.config/stacker")
+func (self Config) UserHomeDir() string {
+    if len(self.Path)<1 {
+        return self.Path
+    }
+	return fmt.Sprintf("./%s.json", os.Args[0])
+}
+
+/* ************************************************************************** */
+//MARK: - Functions
+
+/* Create the storage path for  */
+func createUserStoreDir(cxt Config) {
+	config := ExpandPath(filepath.Dir(cxt.UserHomeDir()))
 	if _, err := os.Stat(config) ; err != nil {
 		os.MkdirAll(config, 0750)
 	}
 }
 
-func LoadItemsFromDisk() (Stacker, bool) {
-	CreateUserStoreDir()
-	fileName := UserHomeDir()
+/*
+Load a storage file and return a stacker struct and a bool. The bool is true if
+config already existing, false if it is assumed.
+*/
+func loadItemsFromDisk(cxt Config) (Stacker, bool) {
+	createUserStoreDir(cxt)
+	fileName := cxt.UserHomeDir()
 	var data Stacker
 	if FileExists(fileName) {
-		raw_data := Read(fileName)
+		raw_data := FileRead(fileName)
 		data = *FromBytes(raw_data)
 		return data, true
 	}
@@ -41,79 +55,121 @@ func LoadItemsFromDisk() (Stacker, bool) {
 	return data, false
 }
 
-/*****************************************************************************/
-//mark - CRUD actions
+/* Save a Stacker image to disk */
+func saveItemsToDisk(cxt Config, data Stacker) {
+	FileSave(cxt.UserHomeDir(), data.ToJson())
+}
 
-func CreateItem(text string) {
+/*****************************************************************************/
+//MARK: - Public CRUD actions
+
+/* Create an Item in the Stack */
+func CreateItem(cxt Config, text string) {
 	var data Stacker
 	var exists bool
-	if data, exists = LoadItemsFromDisk() ; exists {
+	if data, exists = loadItemsFromDisk(cxt) ; exists {
 		if 0<len(data.Items) {
 			if data.Peek().Data == text {
 				return
 			}
 		}
 	}
-
 	data.Push(MakeItem(text))
-	Save(UserHomeDir(), data.ToJson())
+	saveItemsToDisk(cxt, data)
 }
 
-func ReadItem() string {
-	if data, exists := LoadItemsFromDisk() ; exists {
+/* Read an Item from the Stack */
+func ReadItem(cxt Config) string {
+	var value string
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
 		item := data.Pop()
-		Save(UserHomeDir(), data.ToJson())
-		return item.Data
+		saveItemsToDisk(cxt, data)
+		value = item.Data
 	}
-	return ""
+	return value
 }
 
-func updateItem(text string) {
-	if data, exists := LoadItemsFromDisk() ; exists {
-		data.Pop()
+/* Update the top Item on the Stack */
+func UpdateItem(cxt Config, text string) string {
+	var old string
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
+		item := data.Pop()
+		old = item.Data
 		data.Push(MakeItem(text))
-		Save(UserHomeDir(), data.ToJson())
+		saveItemsToDisk(cxt, data)
 	}
+	return old
 }
 
-func DeleteItem() {
-	if data, exists := LoadItemsFromDisk() ; exists {
-		data.Pop()
-		Save(UserHomeDir(), data.ToJson())
+/* Delete the top Item in the Stack */
+func DeleteItem(cxt Config) string {
+	var old string
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
+		item := data.Pop()
+		old = item.Data
+		saveItemsToDisk(cxt, data)
 	}
+	return old
 }
 
 /*****************************************************************************/
-//mark - Other actions
+//MARK: - Other Public actions
 
-func PeekItem() string {
-	if data, exists := LoadItemsFromDisk() ; exists {
-		return data.Peek().Data
+/* Return the first item off the stack without doing a Pop */
+func PeekItem(ctx Config) string {
+	var value string
+	if data, exists := loadItemsFromDisk(ctx) ; exists {
+		value = data.Peek().Data
 	}
-	return ""
+	return value
 }
 
-func ListItems() string {
-	if data, exists := LoadItemsFromDisk() ; exists {
+/* Return a formated list of stack items */
+func ListItems(cxt Config) string {
+	var everything string
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
 		list := []string{}
 		for i, item := range data.Items {
-			list = append(list, fmt.Sprintf("%d\t%s", i, item.Data))
+		    text := strings.TrimSpace(item.Data)
+		    id := color(32, fmt.Sprintf("%d", i))
+			list = append(list, fmt.Sprintf("%s\t%s", id, text))
 		}
-		return strings.Join(list, "\n")
+		everything = strings.Join(list, "\n")
+	}
+	return everything
+}
+
+/* Rotate the stack up, taking the last item and making it the first */
+func RotateUp(cxt Config) string {
+	var top string
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
+		data.RotateUp()
+		saveItemsToDisk(cxt, data)
+		top = data.Peek().Data
+	}
+	return top
+}
+
+/* Clear all items off the stack */
+func ClearAll(cxt Config) string {
+	if data, exists := loadItemsFromDisk(cxt) ; exists {
+		data.Clear()
+		saveItemsToDisk(cxt, data)
 	}
 	return ""
 }
 
-func RotateUp() {
-	if data, exists := LoadItemsFromDisk() ; exists {
-		data.RotateUp()
-		Save(UserHomeDir(), data.ToJson())
-	}
-}
-
-func ClearAll() {
-	if data, exists := LoadItemsFromDisk() ; exists {
-		data.Clear()
-		Save(UserHomeDir(), data.ToJson())
+/* Remove items older then the limit */
+func RemoveOld(cxt Config, limit int) {
+	if limit > 0 {
+		if data, exists := loadItemsFromDisk(cxt) ; exists {
+			for i:=len(data.Items)-1 ; i>=0 ; i-- {
+				item := data.Items[i]
+				if item.FromNow() > limit {
+					fmt.Printf("%s %d-%s\n", color(33, "found an old one:"),
+					    item.Time, item.Data)
+				}
+			}
+		}
 	}
 }
