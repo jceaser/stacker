@@ -7,7 +7,7 @@ do_build() {
 }
 
 do_test() {
-	watch --color go test
+	watch --color go test ./tests/...
 }
 
 do_vet() {

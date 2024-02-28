@@ -132,7 +132,7 @@ func (data *Stacker) RotateUp() {
 
 /* Create a new Item struct using the current time as the time stamp */
 func MakeItem(data string) Item {
-	item := Item{time.Now().Unix(), data}
+	item := Item{Time_now_unix(), data}
 	return item
 }
 

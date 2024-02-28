@@ -20,7 +20,7 @@ type Config struct {
 }
 
 func (self Config) UserHomeDir() string {
-    if len(self.Path)<1 {
+    if 0 < len(self.Path) {
         return self.Path
     }
 	return fmt.Sprintf("./%s.json", os.Args[0])

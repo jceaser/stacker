@@ -28,11 +28,11 @@ Read something, consuming it:
 	>stacker
 	thing
 
-Show everything:
+Show everything in a tab delimitated list:
 
 	>stacker -ls
-	thing 1
-	thing 2
+	0 thing 1
+	1 thing 2
 
 Update something, replacing:
 
@@ -41,6 +41,17 @@ Update something, replacing:
 Delete something
 
 	>stacker -delete
+
+## Development
+
+To test the application, use:
+
+	>go test ./tests/...
+
+To build this application, take care to name the output because "stacker" is a
+directory:
+
+	>go build -o bin/stacker
 
 ---
 Copyright 2024 by thomas.cherry@gmail.com, all rights reserved.
