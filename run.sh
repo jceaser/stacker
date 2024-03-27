@@ -6,6 +6,11 @@ do_build() {
 	go build -o bin/stacker
 }
 
+do_cover() {
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+}
+
 do_test() {
 	watch --color go test ./tests/...
 }
@@ -38,9 +43,10 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-while getopts bftvx: opt ; do
+while getopts bcftvx: opt ; do
     case "${opt}" in
         b) do_build ;;
+        c) do_cover ;;
         t) do_test ;;
         v) do_vet ;;
         f) do_fmt ;;

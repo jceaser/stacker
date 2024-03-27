@@ -33,6 +33,7 @@ type AppData struct {
 	rotateMode  *bool
 	clearMode   *bool
 	versionMode *bool
+	http        *bool
 	cleanLimit  *int
 
 	encode *bool
@@ -45,12 +46,19 @@ func (self AppData) Context() stacker.Config {
 }
 
 /* ************************************************************************** */
+//MARK: - Server
+
+func host(config stacker.Config) {
+	stacker.Host(config)
+}
+
+/* ************************************************************************** */
 //MARK: - Functions
 
 /*
 export XDG_CONFIG_HOME=~/.config/test ; go run stacker.go
 */
-func findConfigPath() string {
+func FindConfigPath() string {
 	configHome := os.Getenv("XDG_CONFIG_HOME")                //standard location
 	appConfigPath := filepath.Base(os.Args[0]) + "/data.json" //sub directory
 	if len(configHome) < 1 {
@@ -62,7 +70,7 @@ func findConfigPath() string {
 }
 
 /* create app data from the command line flags */
-func setup() AppData {
+func Setup() AppData {
 	app_data := AppData{}
 	app_data.peekMode = flag.Bool("peek", false, "peek mode")
 	app_data.listMode = flag.Bool("ls", false, "List Everything")
@@ -72,6 +80,7 @@ func setup() AppData {
 	app_data.clearMode = flag.Bool("clear", false, "Clear all data")
 	app_data.versionMode = flag.Bool("version", false, "Clear all data")
 
+	app_data.http = flag.Bool("http", false, "Create HTTP host")
 	app_data.cleanLimit = flag.Int("clean", -1, "Clean old data")
 	app_data.encode = flag.Bool("encode", false, "Mask sensitive data in list and file")
 	app_data.name = flag.String("name", "default", "Stack Name")
@@ -79,7 +88,7 @@ func setup() AppData {
 	flag.Parse()
 
 	if len(*app_data.path) < 1 {
-		default_path := findConfigPath()
+		default_path := FindConfigPath()
 		app_data.path = &default_path
 	}
 
@@ -120,7 +129,7 @@ func StreamAction(app_data AppData) {
 }
 
 func main() {
-	app_data := setup()
+	app_data := Setup()
 
 	if *app_data.versionMode {
 		fmt.Println("stacker 1.0 by thomas.cherry@gmail.com")
@@ -130,10 +139,12 @@ func main() {
 
 	config := app_data.Context()
 
-	if *app_data.peekMode {
-		fmt.Println(stacker.PeekItem(config))
+	if *app_data.http {
+		host(config)
 	} else if *app_data.listMode {
 		fmt.Print(stacker.ListItems(config))
+	} else if *app_data.peekMode {
+		fmt.Println(stacker.PeekItem(config))
 	} else if *app_data.deleteMode {
 		fmt.Println(stacker.DeleteItem(config))
 	} else if *app_data.clearMode {

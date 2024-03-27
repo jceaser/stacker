@@ -14,21 +14,22 @@ import (
 /**************************************/
 // MARK - Functions
 
+//spaces are significant
 var sample = []byte(`{
   "Name": "default",
   "Items": [
-	{
-	  "Time": 1709054366,
-	  "Data": "d1"
-	},
-	{
-	  "Time": 1709054371,
-	  "Data": "d2"
-	},
-	{
-	  "Time": 1709054380,
-	  "Data": "d3"
-	}
+    {
+      "Time": 1709054366,
+      "Data": "d1"
+    },
+    {
+      "Time": 1709054371,
+      "Data": "d2"
+    },
+    {
+      "Time": 1709054380,
+      "Data": "d3"
+    }
   ]
 }`)
 

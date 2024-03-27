@@ -42,6 +42,20 @@ Delete something
 
 	>stacker -delete
 
+## Web Usage
+
+Use the `-http` flag to open on port 3333.
+
+| Method | Path  | Description |
+| ------ | ----- | ----------- |
+|   GET  | /list | List stack items
+|   GET  | /     | Return top item on stack
+|  POST  | /rot  | Rotate Stack
+|   PUT  | /     | Push value onto stack
+| DELETE | /     | Pop the stack
+|  HEAD  | /*    | Info on holdings
+
+
 ## Development
 
 To test the application, use:

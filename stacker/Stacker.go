@@ -10,7 +10,6 @@ package stacker
 import (
 	"encoding/json"
 	"log"
-	"time"
 )
 
 /******************************************************************************/
@@ -35,7 +34,7 @@ stored.
 type Item struct {
 	Time    int64
 	Data    string
-	Content string
+	Content string `json:",omitempty"`
 }
 
 /* Creates a storable Json record for Stacker */

@@ -14,20 +14,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"crypto/sha1"
+	//"encoding/base64"
 )
-
-type Config struct {
-	Name   string
-	Path   string
-	Encode bool
-}
-
-func (self Config) UserHomeDir() string {
-	if 0 < len(self.Path) {
-		return self.Path
-	}
-	return fmt.Sprintf("./%s.json", os.Args[0])
-}
 
 /* extend the Item by adding Actual() which decodes the Data based on Content */
 func (self Item) Actual() string {
@@ -155,6 +145,17 @@ func DeleteItem(cxt Config) string {
 /*****************************************************************************/
 //MARK: - Other Public actions
 
+func HashItems(ctx Config) string {
+	if data, exists := loadItemsFromDisk(ctx); exists {
+		hasher := sha1.New()
+		hasher.Write([]byte(data.ToJson()))
+		sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+		return string(sha)
+	} else {
+		return ""
+	}
+}
+
 /* Return the first item off the stack without doing a Pop */
 func PeekItem(ctx Config) string {
 	var value string
@@ -164,17 +165,26 @@ func PeekItem(ctx Config) string {
 	return value
 }
 
+func PopItem(ctx Config) string {
+	var value string
+	if data, exists := loadItemsFromDisk(ctx); exists {
+		value = data.Pop().Actual()
+		saveItemsToDisk(ctx, data)
+	}
+	return value
+}
+
 /* Return a formated list of stack items but don't display encoded values */
-func ListItems(cxt Config) string {
+func ListItems(ctx Config) string {
 	var everything string
-	if data, exists := loadItemsFromDisk(cxt); exists {
+	if data, exists := loadItemsFromDisk(ctx); exists {
 		list := []string{}
 		for i, item := range data.Items {
 			text := strings.TrimSpace(item.Data)
 			if item.Content == BASE64 {
 				text = strings.TrimSpace(mask(text))
 			}
-			id := color(32, fmt.Sprintf("%d", i))
+			id := Color(32, fmt.Sprintf("%d", i))
 			list = append(list, fmt.Sprintf("%s\t%s", id, text))
 		}
 		everything = strings.Join(list, "\n")
@@ -209,7 +219,7 @@ func RemoveOld(cxt Config, limit int) {
 			for i := len(data.Items) - 1; i >= 0; i-- {
 				item := data.Items[i]
 				if item.FromNow() > limit {
-					fmt.Printf("%s %d-%s\n", color(33, "found an old one:"),
+					fmt.Printf("%s %d-%s\n", Color(33, "found an old one:"),
 						item.Time, item.Data)
 				}
 			}

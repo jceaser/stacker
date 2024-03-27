@@ -55,7 +55,7 @@ func AssertBytesCompare(t *testing.T, msg string, expected, actual []byte) {
 	result := bytes.Compare(expected, actual)
 
 	if result != 0 {
-		t.Errorf("%s: %v vs [%v]", msg, expected, actual)
+		t.Errorf("%s: %v vs %v", msg, string(expected), string(actual))
 	}
 }
 

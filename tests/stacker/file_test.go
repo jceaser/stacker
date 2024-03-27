@@ -20,6 +20,10 @@ import (
 func TestExpandPath(t *testing.T) {
 	actual := stacker.ExpandPath("~")
 	AssertTrue(t, "Tildi expand test", len(actual) > 0 && actual != "~")
+
+	actual = stacker.ExpandPath("~/")
+	AssertTrue(t, "Tildi expand test", len(actual) > 0 && actual != "~")
+
 }
 
 func TestFileExists(t *testing.T) {
@@ -45,3 +49,16 @@ func TestFileCrud(t *testing.T) {
 	AssertTrue(t, "File was not deleted", !stacker.FileExists(file_name))
 	AssertEqual(t, "Content did not round trip through file", result, 0)
 }
+
+/*func TestFileReadError(t *testing.T) {
+	ans := stacker.FileRead("c:\\fake")
+	AssertEqual(t, "can't read", "", string(ans))
+}*/
+
+/*func TestFileSaveError(t *testing.T) {
+	stacker.FileSave("8:\\fake", []byte(""))
+}*/
+
+/*func TestFileDeleteError(t *testing.T) {
+	stacker.FileDelete("f:\\fake")
+}*/

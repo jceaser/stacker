@@ -43,7 +43,6 @@ func FileRead(file string) []byte {
 	json_raw, err := os.Open(file)
 	if err != nil {
 		log.Printf("Error: %s\n", err)
-		return nil
 	} else {
 		defer json_raw.Close()
 		bytes, err := ioutil.ReadAll(json_raw)

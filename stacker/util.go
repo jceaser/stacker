@@ -21,9 +21,15 @@ var _time_now_unix_ = int64(-1)
 /******************************************************************************/
 //MARK: - Functions
 
+
 /* Add some color to the output */
-func color(code int, text string) string {
+func Color(code int, text string) string {
 	return fmt.Sprintf("\033[0;%dm%s\033[0m", code, text)
+}
+
+/* used in tests to set a specific time, not live mode */
+func TimeFrezer(then int64) {
+	_time_now_unix_ = then
 }
 
 func Time_now_unix() int64 {
